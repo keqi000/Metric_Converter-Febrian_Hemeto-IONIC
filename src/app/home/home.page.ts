@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {
@@ -17,6 +18,14 @@ import {
   IonCardTitle,
   IonCardContent,
 } from '@ionic/angular/standalone';
+
+import { trigger, transition, style, animate } from '@angular/animations';
+
+type ConversionRates = {
+  [key: string]: {
+    [key: string]: number | ((value: number) => number);
+  };
+};
 
 @Component({
   selector: 'app-home',
@@ -41,6 +50,14 @@ import {
     IonCardTitle,
     IonCardContent,
   ],
+  animations: [
+    trigger('fadeIn', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('300ms', style({ opacity: 1 })),
+      ]),
+    ]),
+  ],
 })
 export class HomePage {
   selectedMetric: string | null = null;
@@ -49,6 +66,7 @@ export class HomePage {
   inputValue: number | null = null;
   conversionResult: { value: number; unit: string } | null = null;
   units: string[] = [];
+  conversionExplanation: string | null = null;
 
   // Daftar satuan untuk setiap metrik
   unitLabels: { [key: string]: { [key: string]: string } } = {
@@ -217,6 +235,10 @@ export class HomePage {
     }
   }
 
+  get isInputDisabled(): boolean {
+    return !this.selectedMetric;
+  }
+
   onUnitChange() {
     this.resetConversion();
   }
@@ -224,6 +246,7 @@ export class HomePage {
   resetConversion() {
     this.inputValue = null;
     this.conversionResult = null;
+    this.conversionExplanation = null; // Tambahkan ini
   }
 
   onConvert() {
@@ -232,17 +255,153 @@ export class HomePage {
       this.selectedUnitTo &&
       this.inputValue !== null
     ) {
+      const result = this.convertUnits(
+        this.selectedUnitFrom,
+        this.selectedUnitTo,
+        this.inputValue
+      );
       this.conversionResult = {
-        value: this.convertUnits(
-          this.selectedUnitFrom,
-          this.selectedUnitTo,
-          this.inputValue
-        ),
+        value: result,
         unit: this.unitLabels[this.selectedMetric!][this.selectedUnitTo!],
       };
+      this.generateConversionExplanation(
+        this.selectedUnitFrom,
+        this.selectedUnitTo,
+        this.inputValue,
+        result
+      );
     } else {
       this.conversionResult = null;
+      this.conversionExplanation = null;
     }
+  }
+
+  generateConversionExplanation(
+    from: string,
+    to: string,
+    inputValue: number,
+    result: number
+  ) {
+    let explanation = `Konversi dari ${from} ke ${to}:\n\n`;
+
+    if (this.selectedMetric === 'length') {
+      const conversionRates = this.getConversionRates()['length'];
+      const rateFrom = conversionRates[from] as number;
+      const rateTo = conversionRates[to] as number;
+
+      explanation += `1 ${from} = ${rateFrom} mm\n`;
+      explanation += `1 ${to} = ${rateTo} mm\n\n`;
+      explanation += `${inputValue} ${from} = ${inputValue} × ${rateFrom} = ${
+        inputValue * rateFrom
+      } mm\n`;
+      explanation += `${inputValue * rateFrom} mm = ${
+        inputValue * rateFrom
+      } ÷ ${rateTo} = ${result} ${to}\n\n`;
+      explanation += `Jadi, ${inputValue} ${from} = ${result} ${to}`;
+    } else if (this.selectedMetric === 'temperature') {
+      if (from === 'Celsius' && to === 'Fahrenheit') {
+        explanation += `Formula: (°C × 9/5) + 32 = °F\n`;
+        explanation += `(${inputValue}°C × 9/5) + 32 = ${result}°F`;
+      } else if (from === 'Fahrenheit' && to === 'Celsius') {
+        explanation += `Formula: (°F - 32) × 5/9 = °C\n`;
+        explanation += `(${inputValue}°F - 32) × 5/9 = ${result}°C`;
+      } else if (from === 'Celsius' && to === 'Kelvin') {
+        explanation += `Formula: °C + 273.15 = K\n`;
+        explanation += `${inputValue}°C + 273.15 = ${result}K`;
+      } else if (from === 'Kelvin' && to === 'Celsius') {
+        explanation += `Formula: K - 273.15 = °C\n`;
+        explanation += `${inputValue}K - 273.15 = ${result}°C`;
+      } else if (from === 'Fahrenheit' && to === 'Kelvin') {
+        explanation += `Formula: (°F - 32) × 5/9 + 273.15 = K\n`;
+        explanation += `(${inputValue}°F - 32) × 5/9 + 273.15 = ${result}K`;
+      } else if (from === 'Kelvin' && to === 'Fahrenheit') {
+        explanation += `Formula: (K - 273.15) × 9/5 + 32 = °F\n`;
+        explanation += `(${inputValue}K - 273.15) × 9/5 + 32 = ${result}°F`;
+      }
+    } else {
+      // Untuk metrik lainnya
+      const conversionRates = this.getConversionRates();
+      if (this.selectedMetric && conversionRates[this.selectedMetric]) {
+        const metricRates = conversionRates[this.selectedMetric];
+        const rateFrom = metricRates[from];
+        const rateTo = metricRates[to];
+
+        if (typeof rateFrom === 'number' && typeof rateTo === 'number') {
+          explanation += `1 ${from} = ${rateFrom} satuan dasar\n`;
+          explanation += `1 ${to} = ${rateTo} satuan dasar\n\n`;
+          explanation += `${inputValue} ${from} = ${inputValue} × ${rateFrom} = ${
+            inputValue * rateFrom
+          } satuan dasar\n`;
+          explanation += `${inputValue * rateFrom} satuan dasar = ${
+            inputValue * rateFrom
+          } ÷ ${rateTo} = ${result} ${to}\n\n`;
+          explanation += `Jadi, ${inputValue} ${from} = ${result} ${to}`;
+        } else {
+          explanation += `Konversi khusus diperlukan untuk ${this.selectedMetric}.`;
+        }
+      } else {
+        explanation += `Metrik tidak valid atau tidak memiliki rates konversi.`;
+      }
+    }
+
+    this.conversionExplanation = explanation;
+  }
+
+  getConversionRates(): ConversionRates {
+    return {
+      length: {
+        Millimeter: 1,
+        Centimeter: 10,
+        Decimeter: 100,
+        Meter: 1000,
+        Dekameter: 10000,
+        Hektometer: 100000,
+        Kilometer: 1000000,
+      },
+      mass: {
+        Milligram: 0.001,
+        Centigram: 0.01,
+        Decigram: 0.1,
+        Gram: 1,
+        Hektogram: 100,
+        Kilogram: 1000,
+        Ton: 1000000,
+      },
+      time: {
+        Millisecond: 0.001,
+        Second: 1,
+        Minute: 60,
+        Hour: 3600,
+        Day: 86400,
+        Week: 604800,
+      },
+      volume: {
+        Milliliter: 0.001,
+        Centiliter: 0.01,
+        Deciliter: 0.1,
+        Liter: 1,
+        Decaliter: 10,
+        Hectoliter: 100,
+        Kiloliter: 1000,
+      },
+      temperature: {
+        Celsius: 1,
+        Fahrenheit: (value: number) => (value * 9) / 5 + 32,
+        Kelvin: (value: number) => value + 273.15,
+      },
+      'luminous intensity': {
+        Candela: 1,
+      },
+      'amount of substance': {
+        Mole: 1,
+        Millimole: 0.001,
+      },
+      'electric current': {
+        Milliampere: 0.001,
+        Ampere: 1,
+        Kiloampere: 1000,
+      },
+    };
   }
 
   convertUnits(from: string, to: string, value: number): number {

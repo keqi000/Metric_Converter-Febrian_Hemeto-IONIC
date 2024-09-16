@@ -3,12 +3,24 @@ ion-content {
   flex-direction: column;
   padding: 0;
   background-color: #ecdfcc;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --overflow: auto;
+  --overflow-y: auto;
+  --ion-text-color: white;
 }
 
 ion-header {
   position: fixed;
   width: 100%;
   top: 0;
+}
+
+ion-toolbar {
+  --background: black;
+  color: white;
 }
 
 #container {
@@ -33,17 +45,49 @@ ion-header {
 
 /* Style for the form */
 .form-container {
-  width: 65%;
+  width: 75%;
   color: white;
-  margin-top: 100px;
+  margin-top: 30px;
+}
+
+pre {
+  color: white;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--ion-font-family, inherit);
+}
+
+ion-input {
+  --padding-start: 40px;
+}
+
+.Penjelasan_konversi {
+  --background: #333333;
+  width: 100%;
+}
+
+ion-card {
+  --background: #333333;
+}
+
+ion-card-title {
+  color: white;
+}
+
+ion-card-content {
+  color: white;
+  text-align: justify;
+  word-break: break-word;
+  font-family: default;
 }
 
 ion-item {
   width: 100%;
+  --background: black;
 }
 
 .result {
-  color: #3c3d37;
+  color: black;
   background: transparent;
   margin-top: 20px;
   font-size: 18px;
