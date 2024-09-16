@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">tugas-1</string>
+    <string name="title_activity_main">tugas-1</string>
+    <string name="package_name">tugas.v1</string>
+    <string name="custom_url_scheme">tugas.v1</string>
+</resources>

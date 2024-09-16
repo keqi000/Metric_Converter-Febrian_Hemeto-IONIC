@@ -1,0 +1,100 @@
+<ion-content [fullscreen]="true">
+  <ion-header>
+    <ion-toolbar>
+      <ion-title> Metric Converter </ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div id="container">
+    <p id="Pembuat">By: Febrian Hemeto</p>
+
+    <div class="form-container">
+      <ion-item>
+        <ion-label>Pilih Metrik</ion-label>
+        <ion-select
+          [(ngModel)]="selectedMetric"
+          placeholder="Pilih Metrik Dahulu"
+          (ionChange)="onMetricChange()"
+        >
+          <ion-select-option value="length">Panjang</ion-select-option>
+          <ion-select-option value="mass">Massa</ion-select-option>
+          <ion-select-option value="time">Waktu</ion-select-option>
+          <ion-select-option value="electric current"
+            >Arus Listrik</ion-select-option
+          >
+          <ion-select-option value="temperature">Suhu</ion-select-option>
+          <ion-select-option value="luminous intensity"
+            >Intensitas Cahaya</ion-select-option
+          >
+          <ion-select-option value="amount of substance"
+            >Jumlah Zat</ion-select-option
+          >
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Dari:</ion-label>
+        <ion-select
+          [(ngModel)]="selectedUnitFrom"
+          [disabled]="!units.length"
+          placeholder="--Pilih Satuan"
+          (ionChange)="onUnitChange()"
+        >
+          <ion-select-option *ngFor="let unit of units" [value]="unit">
+            {{ unit }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Ke:</ion-label>
+        <ion-select
+          [(ngModel)]="selectedUnitTo"
+          [disabled]="!units.length"
+          placeholder="--Pilih Satuan"
+          (ionChange)="onUnitChange()"
+        >
+          <ion-select-option *ngFor="let unit of units" [value]="unit">
+            {{ unit }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">Nilai</ion-label>
+        <ion-input
+          [(ngModel)]="inputValue"
+          type="number"
+          [disabled]="!selectedMetric"
+          (ionInput)="onConvert()"
+        ></ion-input>
+      </ion-item>
+
+      <div *ngIf="conversionResult !== null" class="result">
+        <p>Hasil: {{ conversionResult.value }} {{ conversionResult.unit }}</p>
+      </div>
+
+      <ion-item *ngIf="selectedMetric">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Penjelasan Konversi</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <p>{{ explanation }}</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-item>
+
+      <ion-item *ngIf="selectedMetric">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Fakta Menarik</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <p>{{ interestingFacts }}</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-item>
+    </div>
+  </div>
+</ion-content>
