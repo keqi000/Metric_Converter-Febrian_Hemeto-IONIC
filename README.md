@@ -5,6 +5,8 @@ Pengembangan Aplikasi Mobile (A)
 
 repositori ini hanya digunakan untuk repo aplikasi metric converter tugas 1
 
+![gif](https://github.com/keqi000/Metric_Converter-Febrian_Hemeto-IONIC/blob/main/src/assets/11zon_created-GIF.gif?raw=true)
+
 # Link Aplikasi
 https://drive.google.com/drive/folders/1P0XlmuppQDaJ1rxUDwJ6sDG7qGLZdr5k
 
